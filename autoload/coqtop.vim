@@ -199,12 +199,12 @@ function! s:count_dots(lines, lineno)"{{{
     if match(l:line, 'Notation') == 0
       let l:count += 1
     else
-      let l:pos = match(l:line, '\.')
+      let l:pos = match(l:line, '\(\. \|\.$\)')
       while l:pos != -1
         if synIDattr(synID(l:lineno, l:pos+1, 1), 'name') !~# 'Comment'
           let l:count += 1
         endif
-        let l:pos = match(l:line, '\.', l:pos+1)
+        let l:pos = match(l:line, '\(\. \|\.$\)', l:pos+1)
       endwhile
     endif
     let l:lineno += 1
