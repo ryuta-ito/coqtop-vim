@@ -196,6 +196,11 @@ function! s:count_dots(lines, lineno)"{{{
       let l:lineno += 1
       continue
     endif
+
+    if match(l:line, '^ *-') == 0
+      let l:count += 1
+    endif
+
     if match(l:line, 'Notation') == 0
       let l:count += 1
     else
