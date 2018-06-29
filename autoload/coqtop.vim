@@ -178,7 +178,7 @@ function! s:coq.eval_to(end) abort"{{{
       let l:lineno += 1
       let l:r = s:count_dots([l:lines[l:lineno - self.last_line - 1]], l:lineno)
     endwhile
-    let [l:msg, l:prompt] = split(l:outputs[l:i], '<prompt>')
+    let [l:msg, l:prompt] = split(l:outputs[l:i + (l:r-1)], '<prompt>')
     let self.backtrack[l:lineno] = s:parse_prompt(l:prompt)
     let l:lineno += 1
     let l:i += l:r
