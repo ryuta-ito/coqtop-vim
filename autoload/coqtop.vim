@@ -199,7 +199,7 @@ function! s:count_dots(lines, lineno)"{{{
     endif
 
     for bullet_regexp in l:bullet_regexps
-      if match(l:line, bullet_regexp) == 0
+      if match(l:line, bullet_regexp) == 0 && synIDattr(synID(l:lineno, 1, 1), 'name') !~# 'Comment'
         let l:count += 1
       endif
     endfor
