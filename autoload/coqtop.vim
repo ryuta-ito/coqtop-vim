@@ -193,7 +193,9 @@ function! s:count_dots(lines, lineno)"{{{
   let l:bullet_regexps = ['^ *-', '^ *+', '^ *\*']
   for l:line in a:lines
     if match(l:line, '\<Require Import\>') != -1
-      let l:count += 1
+      if synIDattr(synID(l:lineno, 1, 1), 'name') !~# 'Comment'
+        let l:count += 1
+      endif
       let l:lineno += 1
       continue
     endif
