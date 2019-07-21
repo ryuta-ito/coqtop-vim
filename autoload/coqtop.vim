@@ -59,7 +59,7 @@ endfunction"}}}
 
 function! s:coq.check_line()"{{{
   let l:line = line('.')
-  if l:line <= self.last_line && l:line < line('$')
+  if l:line <= self.last_line-1 && l:line < line('$')
     setlocal nomodifiable
   else
     setlocal modifiable
@@ -119,6 +119,9 @@ endfunction"}}}
 function! s:coq.goto(end) abort"{{{
   if a:end < self.last_line
     call self.do_backtrack(a:end)
+  elseif a:end == self.last_line
+    call self.clear()
+    call self.eval_to(a:end)
   else
     call self.eval_to(a:end)
   endif
@@ -128,7 +131,7 @@ function! s:coq.goto(end) abort"{{{
   if self.match_id > 0
     call matchdelete(self.match_id)
   endif
-  let self.match_id = matchadd('coqtopFrozen', '\%' . self.last_line . 'l')
+  let self.match_id = matchadd('coqtopFrozen', '\%' . self.last_line . 'l'. '\%1c')
 endfunction"}}}
 
 function! s:coq.do_backtrack(end) abort"{{{
