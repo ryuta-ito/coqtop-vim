@@ -193,7 +193,7 @@ endfunction"}}}
 function! s:count_dots(lines, lineno)"{{{
   let l:count = 0
   let l:lineno = a:lineno
-  let l:bullet_regexps = ['^ *-', '^ *+', '^ *\*']
+  let l:bullet_regexps = ['^ *-$','^ *- ', '^ *+', '^ *\*']
   for l:line in a:lines
     if match(l:line, '\.\{-2,}') != -1
       return 0
