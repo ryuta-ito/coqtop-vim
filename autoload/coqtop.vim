@@ -196,7 +196,8 @@ function! s:count_dots(lines, lineno)"{{{
   let l:bullet_regexps = ['^ *-$','^ *- ', '^ *+', '^ *\*']
   for l:line in a:lines
     if match(l:line, '\<Add LoadPath\>') == 0
-      return 1
+      let l:count += 1
+      continue
     endif
 
     if match(l:line, '\.\{-2,}') != -1
