@@ -28,7 +28,7 @@ function! s:coq.start()"{{{
 
   command! -buffer CoqQuit call b:coq.quit()
   command! -buffer CoqClear call b:coq.clear()
-  command! -buffer CoqGoto call b:coq.goto(<line2>)
+  command! -buffer CoqGoto call b:coq.goto()
   command! -buffer -nargs=1 CoqPrint call b:coq.print(<q-args>)
   command! -buffer -nargs=1 CoqSearchAbout call b:coq.search_about(<q-args>)
 
@@ -116,50 +116,18 @@ function! s:coq.clear()"{{{
   call self.display(split(l:msg, '\n'))
 endfunction"}}}
 
-function! s:coq.goto(end) abort"{{{
-  if a:end < self.last_line
-    call self.do_backtrack(a:end)
-  elseif a:end == self.last_line
+function! s:coq.goto() abort"{{{
+  let l:end = line(".")
+  if l:end <= self.last_line
     call self.clear()
-    call self.eval_to(a:end)
+    call self.eval_to(l:end)
   else
-    call self.eval_to(a:end)
+    call self.eval_to(l:end)
   endif
-  "let l:pats = range(1, self.last_line)
-  "call map(l:pats, '"\\%" . v:val . "l"')
-  "execute 'match coqtopFrozen /' . join(l:pats, '\|') . '/'
   if self.match_id > 0
     call matchdelete(self.match_id)
   endif
   let self.match_id = matchadd('coqtopFrozen', '\%' . self.last_line . 'l'. '\%1c')
-endfunction"}}}
-
-function! s:coq.do_backtrack(end) abort"{{{
-  let l:end = a:end
-  while !has_key(self.backtrack, l:end) && l:end >= 0
-    let l:end -= 1
-  endwhile
-  if self.backtrack[self.last_line].id != self.backtrack[l:end].id
-    call self.clear()
-    call self.eval_to(l:end)
-    return
-  endif
-
-  let l:backtrack = self.backtrack[l:end]
-  call self.proc.stdin.write(printf("Backtrack %d %d 0.\n", l:backtrack.env_state, l:backtrack.proof_state))
-  let l:buf = self.read_until_prompt(1)
-  let l:buf = substitute(l:buf, '</prompt>.*$', '', '')
-  let [l:msg, l:prompt] = split(l:buf, '<prompt>')
-  if !empty(l:msg)
-    call self.display(split(l:msg, '\n'))
-  endif
-  if match(l:msg, '^Error') == -1
-    let self.backtrack[l:end] = s:parse_prompt(l:prompt)
-    let self.last_line = l:end
-  else
-    call self.clear()
-    call self.eval_to(l:end)
-  endif
 endfunction"}}}
 
 function! s:coq.eval_to(end) abort"{{{
@@ -196,6 +164,12 @@ function! s:count_dots(lines, lineno)"{{{
   let l:bullet_regexps = ['^ *-$','^ *- ', '^ *+', '^ *\*']
   for l:line in a:lines
     if match(l:line, '\<Add LoadPath\>') == 0
+      let l:count += 1
+      continue
+    endif
+
+    " ' .. 'がある場合は1行のNotations with recursive patternsとして扱う
+    if match(l:line, ' \.\. ') != -1
       let l:count += 1
       continue
     endif
