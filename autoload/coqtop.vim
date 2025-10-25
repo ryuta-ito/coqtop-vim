@@ -53,10 +53,7 @@ function! s:coq.start()"{{{
     imap <buffer> <C-g> <Plug>(coqtop-goto)
   endif
 
-  hi def link coqtopFrozen Folded
-  augroup coqtop
-    autocmd CursorMoved,CursorMovedI <buffer> call b:coq.check_line()
-  augroup END
+  hi def link coqtopFrozen CurSearch
 endfunction"}}}"}}}
 
 function! s:coqgoto_i()"{{{
@@ -65,15 +62,6 @@ function! s:coqgoto_i()"{{{
     return l:prefix . 'o'
   else
     return l:prefix . 'jO'
-  endif
-endfunction"}}}
-
-function! s:coq.check_line()"{{{
-  let l:line = line('.')
-  if l:line <= self.last_line-1 && l:line < line('$')
-    setlocal nomodifiable
-  else
-    setlocal modifiable
   endif
 endfunction"}}}
 
