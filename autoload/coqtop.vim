@@ -12,8 +12,19 @@ let s:coq = {
       \ 'match_id': 0,
       \ }
 
+function! s:coq_project_options()
+  let inputfile = "./_CoqProject"
+  let array = []
+  if filereadable(inputfile)
+    for line in readfile(inputfile)
+      let array = array + split(line, "")
+    endfor
+  endif
+  return array
+endfunction
+
 function! s:coq.start()"{{{
-  let self.proc = vimproc#popen2(['coqtop', '-emacs'])
+  let self.proc = vimproc#popen2(['coqtop', '-emacs'] + s:coq_project_options())
 
   rightbelow vnew
     let self.bufnr = bufnr('%')
@@ -104,7 +115,7 @@ endfunction"}}}
 function! s:coq.clear()"{{{
   call self.proc.stdin.write("Quit.\n")
   call self.proc.waitpid()
-  let self.proc = vimproc#popen2(['coqtop', '-emacs'])
+  let self.proc = vimproc#popen2(['coqtop', '-emacs'] + s:coq_project_options())
   let self.last_line = 0
   let self.backtrack = {}
   if self.match_id > 0
