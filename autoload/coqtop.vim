@@ -27,8 +27,8 @@ function! s:coq.start()"{{{
   let self.proc = vimproc#popen2(['coqtop', '-emacs'] + s:coq_project_options())
 
   rightbelow vnew
-    let self.bufnr = bufnr('%')
-    setlocal buftype=nofile bufhidden=hide noswapfile
+  let self.bufnr = bufnr('%')
+  setlocal buftype=nofile bufhidden=hide noswapfile
   wincmd p
   let l:buf = self.read_until_prompt(1)
   let l:buf = substitute(l:buf, '</prompt>.*$', '', '')
@@ -112,7 +112,9 @@ function! s:coq.clear()"{{{
   let l:buf = self.read_until_prompt(1)
   let l:buf = substitute(l:buf, '</prompt>.*$', '', '')
   let [l:msg, l:prompt] = split(l:buf, '<prompt>')
-  call self.display(split(l:msg, '\n'))
+  if !(getline('.') =~ "Check")
+    call self.display(split(l:msg, '\n'))
+  endif
 endfunction"}}}
 
 function! s:coq.goto() abort"{{{
@@ -154,7 +156,11 @@ function! s:coq.eval_to(end) abort"{{{
     let l:i += l:r
   endwhile
   let self.last_line = l:lineno - 1
-  call self.display(split(l:msg, '\n'))
+  if getline('.') =~ "Check"
+    call self.display_check(split(l:msg, '\n'))
+  else
+    call self.display(split(l:msg, '\n'))
+  endif
 endfunction"}}}
 
 function! s:count_dots(lines, lineno)"{{{
@@ -230,7 +236,31 @@ endfunction"}}}
 function! s:coq.display(lines)"{{{
   try
     let l:cur = winnr()
+
+    if bufexists('Check')
+      bw! Check
+    endif
+
     execute bufwinnr(self.bufnr) 'wincmd w'
+    silent %delete _
+    call setline(1, a:lines)
+  finally
+    execute l:cur 'wincmd w'
+  endtry
+endfunction"}}}
+
+function! s:coq.display_check(lines)"{{{
+  try
+    let l:cur = winnr()
+    execute bufwinnr(self.bufnr) 'wincmd w'
+
+    if bufexists('Check')
+      bw! Check
+    endif
+
+    rightbelow new Check
+    execute "horizontal resize " . (len(a:lines) + 4)
+    execute bufwinnr('Check') 'wincmd w'
     silent %delete _
     call setline(1, a:lines)
   finally
