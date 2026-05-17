@@ -17,7 +17,9 @@ function! s:coq_project_options()
   let array = []
   if filereadable(inputfile)
     for line in readfile(inputfile)
-      let array = array + split(line, "")
+      if match(line, '-R') == 0
+        let array = array + split(line, "")
+      endif
     endfor
   endif
   return array
