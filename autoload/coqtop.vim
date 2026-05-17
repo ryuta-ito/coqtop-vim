@@ -114,7 +114,7 @@ function! s:coq.clear()"{{{
   let l:buf = self.read_until_prompt(1)
   let l:buf = substitute(l:buf, '</prompt>.*$', '', '')
   let [l:msg, l:prompt] = split(l:buf, '<prompt>')
-  if !(getline('.') =~ "Check")
+  if !(getline('.') =~ '\(Check\|Search\|Print\)')
     call self.display(split(l:msg, '\n'))
   endif
 endfunction"}}}
@@ -158,7 +158,7 @@ function! s:coq.eval_to(end) abort"{{{
     let l:i += l:r
   endwhile
   let self.last_line = l:lineno - 1
-  if getline('.') =~ "Check"
+  if getline('.') =~ '\(Check\|Search\|Print\)'
     call self.display_check(split(l:msg, '\n'))
   else
     call self.display(split(l:msg, '\n'))
