@@ -43,7 +43,7 @@ function! s:coq.start()"{{{
   command! -buffer CoqClear call b:coq.clear()
   command! -buffer CoqGoto call b:coq.goto()
   command! -buffer -nargs=1 CoqPrint call b:coq.print(<q-args>)
-  command! -buffer -nargs=1 CoqSearchAbout call b:coq.search_about(<q-args>)
+  command! -buffer -nargs=1 CoqSearch call b:coq.search(<q-args>)
 
   inoremap <buffer> <expr> <Plug>(coqtop-goto) <SID>coqgoto_i()
   if !exists('g:coqtop_no_default_mappings') || !g:coqtop_no_default_mappings
@@ -51,7 +51,7 @@ function! s:coq.start()"{{{
     nnoremap <buffer> <silent> <LocalLeader>c :<C-u>CoqClear<CR>
     nnoremap <buffer> <silent> <LocalLeader>g :<C-u>CoqGoto<CR>
     nnoremap <buffer> <silent> <LocalLeader>p :<C-u>CoqPrint<Space>
-    nnoremap <buffer> <silent> <LocalLeader>a :<C-u>CoqSearchAbout<Space>
+    nnoremap <buffer> <silent> <LocalLeader>a :<C-u>CoqSearch<Space>
     imap <buffer> <C-g> <Plug>(coqtop-goto)
   endif
 
@@ -88,7 +88,7 @@ function! s:coq.quit()"{{{
   delcommand CoqClear
   delcommand CoqGoto
   delcommand CoqPrint
-  delcommand CoqSearchAbout
+  delcommand CoqSearch
 
   if !exists('g:coqtop_no_default_mappings') || !g:coqtop_no_default_mappings
     nunmap <buffer> <LocalLeader>q
@@ -159,7 +159,7 @@ function! s:coq.eval_to(end) abort"{{{
   endwhile
   let self.last_line = l:lineno - 1
   if getline('.') =~ '\(Check\|Search\|Print\)'
-    call self.display_check(split(l:msg, '\n'))
+    call self.display_with_below(split(l:msg, '\n'))
   else
     call self.display(split(l:msg, '\n'))
   endif
@@ -251,7 +251,7 @@ function! s:coq.display(lines)"{{{
   endtry
 endfunction"}}}
 
-function! s:coq.display_check(lines)"{{{
+function! s:coq.display_with_below(lines)"{{{
   try
     let l:cur = winnr()
     execute bufwinnr(self.bufnr) 'wincmd w'
@@ -275,13 +275,13 @@ function! s:coq.exec_and_display(cmd)"{{{
   let l:buf = self.read_until_prompt(1)
   let l:buf = substitute(l:buf, '</prompt>.*$', '', '')
   let [l:msg, l:prompt] = split(l:buf, '<prompt>')
-  call self.display(split(l:msg, '\n'))
+  call self.display_with_below(split(l:msg, '\n'))
 endfunction"}}}
 
 function! s:coq.print(id)"{{{
   call self.exec_and_display('Print ' . a:id . ".\n")
 endfunction"}}}
 
-function! s:coq.search_about(input)"{{{
-  call self.exec_and_display('SearchAbout ' . a:input . ".\n")
+function! s:coq.search(input)"{{{
+  call self.exec_and_display('Search ' . a:input . ".\n")
 endfunction"}}}
